@@ -153,50 +153,52 @@ function Player:Init()
 		surface.DrawOutlinedRect(0, 0, w, h)
 	end
 
-	self.Info.Ping = vgui.Create("DButton", self.Info)
-	self.Info.Ping:Dock(RIGHT)
-	self.Info.Ping:SetWide(58)
-	self.Info.Ping:SetCursor("arrow")
-	self.Info.Ping:SetTooltip("Ping / AFK Time")
-	self.Info.Ping.Clock = Material("icon16/clock.png")
-	self.Info.Ping.Latency = Material("icon16/transmit_blue.png")
-	function self.Info.Ping.Paint(s, w, h)
-		local ply = self.Player
-		if not IsValid(ply) then return end
+	if self.Player.AFKTime then
+		self.Info.Ping = vgui.Create("DButton", self.Info)
+		self.Info.Ping:Dock(RIGHT)
+		self.Info.Ping:SetWide(58)
+		self.Info.Ping:SetCursor("arrow")
+		self.Info.Ping:SetTooltip("Ping / AFK Time")
+		self.Info.Ping.Clock = Material("icon16/clock.png")
+		self.Info.Ping.Latency = Material("icon16/transmit_blue.png")
+		function self.Info.Ping.Paint(s, w, h)
+			local ply = self.Player
+			if not IsValid(ply) then return end
 
-		local isAFK = ply.IsAFK and ply:IsAFK() or false
-		if isAFK then
-			surface.SetDrawColor(Color(127, 64, 255, 70))
-		else
-			surface.SetDrawColor(Color(127, 167, 99, 70))
+			local isAFK = ply.IsAFK and ply:IsAFK() or false
+			if isAFK then
+				surface.SetDrawColor(Color(127, 64, 255, 70))
+			else
+				surface.SetDrawColor(Color(127, 167, 99, 70))
+			end
+
+			surface.DrawRect(0, 0, w, h)
+
+			surface.SetMaterial(isAFK and s.Clock or s.Latency)
+			surface.SetDrawColor(Color(255, 255, 255))
+			surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
+
+			surface.SetFont("DermaDefault")
+			local txt
+			if isAFK then
+				local AFKTime = math.max(0, CurTime() - ply:AFKTime())
+				local h = math.floor(AFKTime / 60 / 60)
+				local m = math.floor(AFKTime / 60 % 60)
+				local s = math.floor(AFKTime % 60)
+				txt = string.format("%d:%.2d", h >= 1 and h or m, h >= 1 and m or s)
+			else
+				txt = ply:Ping()
+			end
+			local txtW, txtH = surface.GetTextSize(txt)
+			surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
+			surface.SetTextColor(Color(0, 0, 0, 230))
+			surface.DrawText(txt)
+
+			return true
 		end
-
-		surface.DrawRect(0, 0, w, h)
-
-		surface.SetMaterial(isAFK and s.Clock or s.Latency)
-		surface.SetDrawColor(Color(255, 255, 255))
-		surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
-
-		surface.SetFont("DermaDefault")
-		local txt
-		if isAFK then
-			local AFKTime = math.max(0, CurTime() - ply:AFKTime())
-			local h = math.floor(AFKTime / 60 / 60)
-			local m = math.floor(AFKTime / 60 % 60)
-			local s = math.floor(AFKTime % 60)
-			txt = string.format("%d:%.2d", h >= 1 and h or m, h >= 1 and m or s)
-		else
-			txt = ply:Ping()
-		end
-		local txtW, txtH = surface.GetTextSize(txt)
-		surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
-		surface.SetTextColor(Color(0, 0, 0, 230))
-		surface.DrawText(txt)
-
-		return true
 	end
 
-	if LocalPlayer().GetPlaytime then
+	if self.Player.GetPlaytime then
 		self.Info.Playtime = vgui.Create("DButton", self.Info)
 		self.Info.Playtime:Dock(RIGHT)
 		self.Info.Playtime:SetWide(46)
@@ -248,7 +250,7 @@ function Player:PerformLayout()
 end
 
 Player.Friend = Material("icon16/user_green.png")
-Player.Self = Material("icon16/user.png")
+Player.Self   = Material("icon16/user.png")
 Player.Shield = Material("icon16/shield.png")
 Player.Typing = Material("icon16/comments.png")
 Player.Wrench = Material("icon16/wrench.png")
@@ -330,7 +332,7 @@ function Player:Paint(w, h)
 		end
 	end
 
-	if (lply ~= ply and ply:IsFriend()) or lply == ply then
+	if (lply ~= ply and ply:GetFriendStatus() == "friend") or lply == ply then
 		DisableClipping(true)
 			surface.SetDrawColor(Color(255, 255, 255, 127))
 			surface.SetMaterial(lply == ply and self.Self or self.Friend)
