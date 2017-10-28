@@ -369,12 +369,10 @@ function scoreboard:HandlePlayers()
 	self.Last = player.GetCount()
 	local i = 0
 	for id, pnl in next, self.Teams:GetTeams() do
-		if IsValid(pnl) and pnl:IsVisible() then -- #team.GetPlayers(id) > 0 then
-			if pnl.Last ~= #team.GetPlayers(id) or pnl.Last ~= #pnl:GetChildren() then
-				self:RefreshPlayers(id)
-			end
-			i = i + 1
+		if not IsValid(pnl) or pnl.Last ~= #team.GetPlayers(id) or pnl.Last ~= #pnl:GetChildren() then
+			self:RefreshPlayers(id)
 		end
+		i = i + 1
 	end
 	for id, pnl in next, self.Teams:GetTeams() do
 		if pnl and pnl:IsVisible() then
