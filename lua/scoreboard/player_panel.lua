@@ -307,7 +307,7 @@ function Player:Paint(w, h)
 	for _, pnl in next, self.Info:GetChildren() do
 		infoW = infoW + pnl:GetWide()
 	end
-	local x = w - infoW - 4
+	local x = w - infoW --- 4
 	for _, tag in next, self.Tags do
 		local text, icon = tag.display(ply)
 		if text and icon then
