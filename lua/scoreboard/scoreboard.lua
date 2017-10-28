@@ -361,7 +361,7 @@ function scoreboard:HandlePlayers()
 	for _, ply in next, player.GetAll() do
 		local id = ply:Team()
 		local pnl = self.Teams[id]
-		if (not self.Last or self.Last ~= player.GetCount()) and not done[id] then
+		if (not pnl or not self.Last or self.Last ~= player.GetCount()) and not done[id] then
 			self:RefreshPlayers(id)
 			done[id] = true
 		end
