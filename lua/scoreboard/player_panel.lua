@@ -128,10 +128,7 @@ function Player:Init()
 	function self.Info.Paint(s, w, h)
 		local ply = self.Player
 		if not IsValid(ply) then
-			self.Player = _G.Player(self.UserID)
-			if not IsValid(self.Player) then
-				self:Remove()
-			end
+			self:Remove()
 			return
 		end
 
@@ -153,7 +150,7 @@ function Player:Init()
 		surface.DrawOutlinedRect(0, 0, w, h)
 	end
 
-	if self.Player.AFKTime then
+	if LocalPlayer().AFKTime then
 		self.Info.Ping = vgui.Create("DButton", self.Info)
 		self.Info.Ping:Dock(RIGHT)
 		self.Info.Ping:SetWide(58)
@@ -198,7 +195,7 @@ function Player:Init()
 		end
 	end
 
-	if self.Player.GetPlaytime then
+	if LocalPlayer().GetPlaytime then
 		self.Info.Playtime = vgui.Create("DButton", self.Info)
 		self.Info.Playtime:Dock(RIGHT)
 		self.Info.Playtime:SetWide(46)
