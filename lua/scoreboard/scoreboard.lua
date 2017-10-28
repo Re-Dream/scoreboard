@@ -357,6 +357,7 @@ player.GetCount = player.GetCount or function()
 	return #player.GetAll()
 end
 function scoreboard:HandlePlayers()
+	-- init players the first time they join
 	local done = {}
 	for _, ply in next, player.GetAll() do
 		local id = ply:Team()
@@ -367,13 +368,19 @@ function scoreboard:HandlePlayers()
 		end
 	end
 	self.Last = player.GetCount()
+
+	-- refresh teams if they change
 	local i = 0
 	for id, pnl in next, self.Teams:GetTeams() do
 		if not IsValid(pnl) or pnl.Last ~= #team.GetPlayers(id) or pnl.Last ~= #pnl:GetChildren() then
-			self:RefreshPlayers(id)
+			pnl = self:RefreshPlayers(id)
 		end
-		i = i + 1
+		if pnl:IsVisible() then
+			i = i + 1
+		end
 	end
+
+	-- check if there is only 1 team
 	for id, pnl in next, self.Teams:GetTeams() do
 		if pnl and pnl:IsVisible() then
 			pnl:SetLone(i < 2)
@@ -424,6 +431,8 @@ function scoreboard:RefreshPlayers(id)
 		else
 			pnl:SetVisible(true)
 		end
+
+		return pnl
 	end
 end
 
