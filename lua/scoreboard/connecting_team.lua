@@ -47,7 +47,7 @@ elseif CLIENT then
 
 	gameevent.Listen("player_spawn")
 	hook.Add("player_spawn", tag, function(data)
-		scoreboard.Connecting[info.userid].spawned = true
+		scoreboard.Connecting[data.userid].spawned = true
 	end)
 end
 
