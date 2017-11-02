@@ -366,9 +366,6 @@ function scoreboard:HandlePlayers()
 		local pnl = self.Teams[id]
 		if (not pnl or not self.Last or self.Last ~= player.GetCount()) and not done[id] then
 			-- player is connected, don't need to show as connecting anymore
-			if self.Connecting and self.Connecting[ply:UserID()] then
-				self.Connecting[ply:UserID()] = nil
-			end
 			self:RefreshPlayers(id)
 			done[id] = true
 		end

@@ -288,8 +288,15 @@ function Player:PerformLayout()
 end
 
 function Player:Think()
+	local ply = self.Player
+	if istable(ply) then
+		if IsValid(_G.Player(ply.userid)) then
+			scoreboard.Connecting[ply.userid] = nil
+		end
+	end
+
 	if self.Info.Playtime then
-		self.Info.Playtime:SetVisible(IsValid(self.Player))
+		self.Info.Playtime:SetVisible(IsValid(ply))
 	end
 end
 
