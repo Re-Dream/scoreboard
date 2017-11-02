@@ -43,7 +43,9 @@ function scoreboard:GetContentSize()
 	return w, h
 end
 
+-- local GAMEMODE = nil -- GLib
 if not istable(GAMEMODE) then
+	include("scoreboard/connecting_team.lua")
 	include("scoreboard/team_panel.lua")
 	include("scoreboard/player_panel.lua")
 end
@@ -363,11 +365,36 @@ function scoreboard:HandlePlayers()
 		local id = ply:Team()
 		local pnl = self.Teams[id]
 		if (not pnl or not self.Last or self.Last ~= player.GetCount()) and not done[id] then
+			-- player is connected, don't need to show as connecting anymore
+			if self.Connecting and self.Connecting[ply:UserID()] then
+				self.Connecting[ply:UserID()] = nil
+			end
 			self:RefreshPlayers(id)
 			done[id] = true
 		end
 	end
 	self.Last = player.GetCount()
+
+	-- handle (dis)connecting players
+	if self.Connecting then
+		local connecting = 0
+		local disconnecting = 0
+		for userid, info in next, self.Connecting do
+			if not info.left then
+				connecting = connecting + 1
+			else
+				disconnecting = connecting + 1
+			end
+		end
+		if not self.LastConnecting or self.LastConnecting ~= connecting then
+			self:RefreshPlayers(self.ConnectingTeam)
+			self.LastConnecting = connecting
+		end
+		if not self.LastDisconnecting or self.LastDisconnecting ~= disconnecting then
+			self:RefreshPlayers(self.DisconnectedTeam)
+			self.LastDisconnecting = disconnecting
+		end
+	end
 
 	-- refresh teams if they change
 	local i = 0
@@ -388,6 +415,19 @@ function scoreboard:HandlePlayers()
 	end
 end
 
+local function AddPlayer(pnl, userid, ply)
+	local _pnl = pnl[userid]
+	if not _pnl then
+		_pnl = vgui.Create(tag .. "Player", pnl)
+		_pnl.UserID = userid
+		_pnl:SetPlayer(ply)
+		_pnl.Player = ply
+		pnl[userid] = _pnl
+	end
+	_pnl:Dock(TOP)
+	_pnl:DockMargin(8, 0, 8, 0)
+	_pnl:SetTall(36)
+end
 function scoreboard:RefreshPlayers(id)
 	if id then
 		local pnl = self.Teams[id]
@@ -402,25 +442,39 @@ function scoreboard:RefreshPlayers(id)
 			self.Teams[id] = pnl
 		end
 
-		for _, ply in next, team.GetPlayers(id) do
-			local _pnl = pnl[ply:UserID()]
-			if not _pnl then
-				_pnl = vgui.Create(tag .. "Player", pnl)
-				_pnl.UserID = ply:UserID()
-				_pnl:SetPlayer(ply)
-				pnl[ply:UserID()] = _pnl
+		if (id == self.ConnectingTeam or id == self.DisconnectedTeam) and self.Connecting then
+			for userid, info in next, self.Connecting do
+				if (id == self.ConnectingTeam and not info.left) or (id == self.DisconnectedTeam and info.left) then
+					AddPlayer(pnl, userid, info)
+				end
 			end
-			_pnl:Dock(TOP)
-			_pnl:DockMargin(8, 0, 8, 0)
-			_pnl:SetTall(36)
+		else
+			for _, ply in next, team.GetPlayers(id) do
+				AddPlayer(pnl, ply:UserID(), ply)
+			end
 		end
 
 		for _, _pnl in next, pnl:GetChildren() do
-			if _pnl.ClassName == (tag .. "Player") and (not IsValid(_pnl.Player) or _pnl.Player:Team() ~= id) then
-				pnl[_pnl.UserID] = nil
-				_pnl:SetVisible(false)
-				_pnl:SetParent() -- ugly hack to call PerformLayout
-				_pnl:Remove()
+			if _pnl.ClassName == (tag .. "Player") then
+				local ply = _pnl.Player
+				local Do = false
+				if istable(ply) then
+					local info = self.Connecting[ply.userid]
+					if 	not info or
+						(id == self.ConnectingTeam and info.left) or
+						(id == self.DisconnectedTeam and not info.left)
+					then
+						Do = true
+					end
+				elseif not IsValid(ply) or ply:Team() ~= id then
+					Do = true
+				end
+				if Do then
+					pnl[_pnl.UserID] = nil
+					_pnl:SetVisible(false)
+					_pnl:SetParent() -- ugly hack to call PerformLayout
+					_pnl:Remove()
+				end
 			end
 		end
 

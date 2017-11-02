@@ -34,7 +34,8 @@ end
 
 hook.Add("PostRenderVGUI", tag .. "Player", function()
 	if IsValid(hovered) then
-		local avatar = GetAvatar(hovered.Player:SteamID64())
+		local sid64 = hovered:SteamID64()
+		local avatar = GetAvatar(sid64)
 		avatar.Hide = false
 		local x, y = hovered:LocalToScreen(0, 0)
 		avatar:SetPos(x - avatar:GetWide(), y - avatar:GetTall() * 0.5 + hovered:GetTall() * 0.5)
@@ -44,6 +45,12 @@ hook.Add("PostRenderVGUI", tag .. "Player", function()
 	end
 	hovered = nil
 end)
+
+function Player:SteamID64()
+	local ply = self.Player
+	if not IsValid(ply) and not istable(ply) then return end
+	return ply.SteamID64 and ply:SteamID64() or util.SteamIDTo64(ply.steamid)
+end
 
 function Player:Init()
 	self.Avatar = vgui.Create("AvatarImage", self)
@@ -59,27 +66,29 @@ function Player:Init()
 		return true
 	end
 	function self.Avatar.Click.DoClick()
-		if self.Player:SteamID64() == nil then return end
+		local ply = self.Player
+		if ply.SteamID64 and ply:SteamID64() == nil then return end
 		gui.OpenURL("https://steamcommunity.com/profiles/" .. self.Player:SteamID64())
 	end
 	function self.Avatar.Click.DoRightClick()
 		local menu = DermaMenu()
 		local ply = self.Player
+		local sid64 = self:SteamID64()
 
 		menu:AddOption("Open Profile", function()
-			gui.OpenURL("https://steamcommunity.com/profiles/" .. ply:SteamID64())
+			gui.OpenURL("https://steamcommunity.com/profiles/" .. sid64)
 		end):SetIcon("icon16/book_go.png")
 		menu:AddOption("Copy Profile URL", function()
-			SetClipboardText("http://steamcommunity.com/profiles/" .. ply:SteamID64())
+			SetClipboardText("http://steamcommunity.com/profiles/" .. sid64)
 		end):SetIcon("icon16/book_link.png")
 
 		menu:AddSpacer()
 
 		menu:AddOption("Copy SteamID", function()
-			SetClipboardText(ply:SteamID())
+			SetClipboardText(ply.SteamID and ply:SteamID() or ply.steamid)
 		end):SetIcon("icon16/tag_blue.png")
 		menu:AddOption("Copy Community ID", function()
-			SetClipboardText(tostring(ply:SteamID64()))
+			SetClipboardText(tostring(sid64))
 		end):SetIcon("icon16/tag_yellow.png")
 
 		menu:Open()
@@ -89,8 +98,10 @@ function Player:Init()
 	self.Info:Dock(FILL)
 	self.Info:SetCursor("arrow")
 	function self.Info.DoDoubleClick()
+		local ply = self.Player
+		if not IsValid(ply) then return end
 		if mingeban and mingeban.commands.goto then
-			LocalPlayer():ConCommand("mingeban goto _" .. self.Player:EntIndex())
+			LocalPlayer():ConCommand("mingeban goto _" .. ply:EntIndex())
 		end
 	end
 	function self.Info.DoRightClick()
@@ -99,27 +110,25 @@ function Player:Init()
 		local ply = self.Player
 		if mingeban and mingeban.commands then
 			local cmds = mingeban.commands
-			if lply ~= ply then
-				if cmds.goto then
+			if IsValid(ply) and lply ~= ply then
+				if lply:HasPermission("command.goto") and cmds.goto then
 					menu:AddOption("Go To", function()
 						lply:ConCommand("mingeban goto _" .. ply:EntIndex())
 					end):SetIcon("icon16/bullet_go.png")
 				end
 
-				if LocalPlayer():IsAdmin() then
-					if cmds.bring then
-						menu:AddOption("Bring", function()
-							lply:ConCommand("mingeban bring _" .. ply:EntIndex())
-						end):SetIcon("icon16/arrow_in.png")
-					end
+				if lply:HasPermission("command.goto") and cmds.bring then
+					menu:AddOption("Bring", function()
+						lply:ConCommand("mingeban bring _" .. ply:EntIndex())
+					end):SetIcon("icon16/arrow_in.png")
+				end
 
-					menu:AddSpacer()
+				menu:AddSpacer()
 
-					if cmds.kick then
-						menu:AddOption("Kick", function()
-							lply:ConCommand("mingeban kick _" .. ply:EntIndex())
-						end):SetIcon("icon16/door_in.png")
-					end
+				if lply:HasPermission("command.kick") and cmds.kick then
+					menu:AddOption("Kick", function()
+						lply:ConCommand("mingeban kick _" .. ply:EntIndex())
+					end):SetIcon("icon16/door_in.png")
 				end
 			end
 		end
@@ -127,7 +136,7 @@ function Player:Init()
 	end
 	function self.Info.Paint(s, w, h)
 		local ply = self.Player
-		if not IsValid(ply) then
+		if not IsValid(ply) and not istable(ply) then
 			self.Player = _G.Player(self.UserID)
 			if not IsValid(self.Player) then
 				self:Remove()
@@ -135,8 +144,9 @@ function Player:Init()
 			return
 		end
 
+		local nick = ply.Nick and ply:Nick() or ply.name
 		surface.SetFont(tag .. "Player")
-		local txt = ply:Nick()
+		local txt = nick
 		local txtW, txtH = surface.GetTextSize(txt)
 		surface.SetTextPos(6 + 1, h * 0.5 - txtH * 0.5 + 1)
 		surface.SetTextColor(Color(0, 0, 0, 64))
@@ -158,41 +168,66 @@ function Player:Init()
 		self.Info.Ping:Dock(RIGHT)
 		self.Info.Ping:SetWide(58)
 		self.Info.Ping:SetCursor("arrow")
-		self.Info.Ping:SetTooltip("Ping / AFK Time")
 		self.Info.Ping.Clock = Material("icon16/clock.png")
 		self.Info.Ping.Latency = Material("icon16/transmit_blue.png")
 		function self.Info.Ping.Paint(s, w, h)
 			local ply = self.Player
-			if not IsValid(ply) then return end
+			if IsValid(ply) then
+				self.Info.Ping:SetTooltip("Ping / AFK Time")
 
-			local isAFK = ply.IsAFK and ply:IsAFK() or false
-			if isAFK then
-				surface.SetDrawColor(Color(127, 64, 255, 70))
+				local isAFK = ply.IsAFK and ply:IsAFK() or false
+				if isAFK then
+					surface.SetDrawColor(Color(127, 64, 255, 70))
+				else
+					surface.SetDrawColor(Color(127, 167, 99, 70))
+				end
+
+				surface.DrawRect(0, 0, w, h)
+
+				surface.SetMaterial(isAFK and s.Clock or s.Latency)
+				surface.SetDrawColor(Color(255, 255, 255))
+				surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
+
+				surface.SetFont("DermaDefault")
+				local txt
+				if isAFK then
+					local AFKTime = math.max(0, CurTime() - ply:AFKTime())
+					local h = math.floor(AFKTime / 60 / 60)
+					local m = math.floor(AFKTime / 60 % 60)
+					local s = math.floor(AFKTime % 60)
+					txt = string.format("%d:%.2d", h >= 1 and h or m, h >= 1 and m or s)
+				else
+					txt = ply:Ping()
+				end
+				local txtW, txtH = surface.GetTextSize(txt)
+				surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
+				surface.SetTextColor(Color(0, 0, 0, 230))
+				surface.DrawText(txt)
 			else
+				self.Info.Ping:SetTooltip("Connecting since")
+
 				surface.SetDrawColor(Color(127, 167, 99, 70))
+				surface.DrawRect(0, 0, w, h)
+
+				surface.SetMaterial(s.Clock)
+				surface.SetDrawColor(Color(255, 255, 255))
+				surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
+
+				surface.SetFont("DermaDefault")
+				local txt
+				local since = math.max(0, CurTime() - ply.since)
+				local _h = math.floor(since / 60 / 60)
+				local _m = math.floor(since / 60 % 60)
+				local _s = math.floor(since % 60)
+				if _s > (scoreboard.DisconnectedTimeout) then
+					scoreboard.Connecting[self.UserID] = nil
+				end
+				txt = string.format("%d:%.2d", _h >= 1 and _h or _m, _h >= 1 and _m or _s)
+				local txtW, txtH = surface.GetTextSize(txt)
+				surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
+				surface.SetTextColor(Color(0, 0, 0, 230))
+				surface.DrawText(txt)
 			end
-
-			surface.DrawRect(0, 0, w, h)
-
-			surface.SetMaterial(isAFK and s.Clock or s.Latency)
-			surface.SetDrawColor(Color(255, 255, 255))
-			surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
-
-			surface.SetFont("DermaDefault")
-			local txt
-			if isAFK then
-				local AFKTime = math.max(0, CurTime() - ply:AFKTime())
-				local h = math.floor(AFKTime / 60 / 60)
-				local m = math.floor(AFKTime / 60 % 60)
-				local s = math.floor(AFKTime % 60)
-				txt = string.format("%d:%.2d", h >= 1 and h or m, h >= 1 and m or s)
-			else
-				txt = ply:Ping()
-			end
-			local txtW, txtH = surface.GetTextSize(txt)
-			surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
-			surface.SetTextColor(Color(0, 0, 0, 230))
-			surface.DrawText(txt)
 
 			return true
 		end
@@ -206,7 +241,7 @@ function Player:Init()
 		self.Info.Playtime:SetTooltip("Playtime")
 		function self.Info.Playtime.Paint(s, w, h)
 			local ply = self.Player
-			if not IsValid(ply) then return end
+			if not IsValid(ply) then return true end
 
 			surface.SetFont("DermaDefault")
 			local playtime = ply:GetPlaytime()
@@ -232,12 +267,15 @@ function Player:Init()
 end
 
 function Player:RefreshAvatar()
-	if not IsValid(self.Player) or not self.Player:SteamID64() then return end
+	local ply = self.Player
+	if IsValid(ply) and not ply:SteamID64() then return end
+	if not IsValid(ply) and not istable(ply) then return end
+	local sid64 = self:SteamID64()
 
 	local w = 32
 	if self.Avatar:GetTall() > 32 then w = 64 end
 	if self.Avatar:GetTall() > 64 then w = 184 end
-	self.Avatar:SetSteamID(self.Player:SteamID64(), w)
+	self.Avatar:SetSteamID(sid64, w)
 end
 function Player:SetPlayer(ply)
 	self.Player = ply
@@ -247,6 +285,12 @@ end
 function Player:PerformLayout()
 	self.Avatar:SetWide(self.Avatar:GetTall())
 	self:RefreshAvatar()
+end
+
+function Player:Think()
+	if self.Info.Playtime then
+		self.Info.Playtime:SetVisible(IsValid(self.Player))
+	end
 end
 
 Player.Friend = Material("icon16/user_green.png")
@@ -292,7 +336,6 @@ Player.Tags = {
 function Player:Paint(w, h)
 	local lply = LocalPlayer()
 	local ply = self.Player
-	if not IsValid(ply) then return true end
 	local hovered = self.Info:IsHovered() or self.Info:IsChildHovered()
 
 	local isAFK = (IsValid(ply) and ply.IsAFK) and ply:IsAFK() or false
@@ -304,6 +347,8 @@ function Player:Paint(w, h)
 		surface.SetDrawColor(Color(255, 255, 255, self.Info.Depressed and 40 or 90))
 		surface.DrawRect(0, 0, w, h)
 	end
+
+	if not IsValid(ply) then return true end
 
 	local infoW = 0
 	for _, pnl in next, self.Info:GetChildren() do
