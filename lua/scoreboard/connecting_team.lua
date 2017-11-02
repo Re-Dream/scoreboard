@@ -44,5 +44,10 @@ elseif CLIENT then
 		info.since = CurTime()
 		scoreboard.Connecting[info.userid] = info
 	end)
+
+	gameevent.Listen("player_spawn")
+	hook.Add("player_spawn", tag, function(data)
+		scoreboard.Connecting[info.userid].spawned = true
+	end)
 end
 
