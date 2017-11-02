@@ -215,7 +215,7 @@ function Player:Init()
 
 				surface.SetFont("DermaDefault")
 				local txt
-				local since = math.max(0, CurTime() - ply.since)
+				local since = math.max(0, CurTime() - ply.since or 0)
 				local _h = math.floor(since / 60 / 60)
 				local _m = math.floor(since / 60 % 60)
 				local _s = math.floor(since % 60)
