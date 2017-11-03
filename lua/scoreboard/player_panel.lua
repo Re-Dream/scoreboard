@@ -111,13 +111,13 @@ function Player:Init()
 		if mingeban and mingeban.commands then
 			local cmds = mingeban.commands
 			if IsValid(ply) and lply ~= ply then
-				if lply:HasPermission("command.goto") and cmds.goto then
+				if lply:HasPermission("command.go") and cmds.goto then
 					menu:AddOption("Go To", function()
 						lply:ConCommand("mingeban goto _" .. ply:EntIndex())
 					end):SetIcon("icon16/bullet_go.png")
 				end
 
-				if lply:HasPermission("command.goto") and cmds.bring then
+				if lply:HasPermission("command.bring") and cmds.bring then
 					menu:AddOption("Bring", function()
 						lply:ConCommand("mingeban bring _" .. ply:EntIndex())
 					end):SetIcon("icon16/arrow_in.png")
