@@ -373,10 +373,10 @@ function scoreboard:HandlePlayers()
 	self.Last = player.GetCount()
 
 	-- handle (dis)connecting players
-	if self.Connecting then
+	if scoreboard.Connecting then
 		local connecting = 0
 		local disconnecting = 0
-		for userid, info in next, self.Connecting do
+		for userid, info in next, scoreboard.Connecting do
 			if not info.left then
 				connecting = connecting + 1
 			else
@@ -384,11 +384,11 @@ function scoreboard:HandlePlayers()
 			end
 		end
 		if not self.LastConnecting or self.LastConnecting ~= connecting then
-			self:RefreshPlayers(self.ConnectingTeam)
+			self:RefreshPlayers(scoreboard.ConnectingTeam)
 			self.LastConnecting = connecting
 		end
 		if not self.LastDisconnecting or self.LastDisconnecting ~= disconnecting then
-			self:RefreshPlayers(self.DisconnectedTeam)
+			self:RefreshPlayers(scoreboard.DisconnectedTeam)
 			self.LastDisconnecting = disconnecting
 		end
 	end
@@ -439,8 +439,8 @@ function scoreboard:RefreshPlayers(id)
 			self.Teams[id] = pnl
 		end
 
-		if (id == self.ConnectingTeam or id == self.DisconnectedTeam) and self.Connecting then
-			for userid, info in next, self.Connecting do
+		if (id == self.ConnectingTeam or id == self.DisconnectedTeam) and scoreboard.Connecting then
+			for userid, info in next, scoreboard.Connecting do
 				if (id == self.ConnectingTeam and not info.left) or (id == self.DisconnectedTeam and info.left) then
 					AddPlayer(pnl, userid, info)
 				end
@@ -456,7 +456,7 @@ function scoreboard:RefreshPlayers(id)
 				local ply = _pnl.Player
 				local Do = false
 				if istable(ply) then
-					local info = self.Connecting[ply.userid]
+					local info = scoreboard.Connecting[ply.userid]
 					if 	not info or
 						(id == self.ConnectingTeam and info.left) or
 						(id == self.DisconnectedTeam and not info.left)
