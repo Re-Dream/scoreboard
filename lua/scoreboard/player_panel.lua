@@ -289,10 +289,12 @@ end
 
 function Player:Think()
 	local ply = self.Player
-	local info = scoreboard.Connecting[ply.userid]
-	if istable(ply) then
-		if IsValid(_G.Player(ply.userid)) and info.spawned then
-			scoreboard.Connecting[ply.userid] = nil
+	if scoreboard.Connecting then
+		local info = scoreboard.Connecting[ply.userid]
+		if istable(ply) then
+			if IsValid(_G.Player(ply.userid)) and info.spawned then
+				scoreboard.Connecting[ply.userid] = nil
+			end
 		end
 	end
 
