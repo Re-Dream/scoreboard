@@ -228,7 +228,7 @@ function Player:Init()
 					local _h = math.floor(since / 60 / 60)
 					local _m = math.floor(since / 60 % 60)
 					local _s = math.floor(since % 60)
-					if since > (scoreboard.DisconnectedTimeout) then
+					if ply.left == true and since > (scoreboard.DisconnectedTimeout) then
 						scoreboard.Connecting[self.UserID] = nil
 					end
 					txt = string.format("%d:%.2d", _h >= 1 and _h or _m, _h >= 1 and _m or _s)
