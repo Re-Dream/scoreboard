@@ -127,7 +127,11 @@ function Player:Init()
 
 				if lply:HasPermission("command.kick") and cmds.kick then
 					menu:AddOption("Kick", function()
-						lply:ConCommand("mingeban kick _" .. ply:EntIndex())
+						Derma_StringRequest("Scoreboard - Kick " .. ply:Nick(), "What's your reason for kicking this player?", "",
+							function(reason)
+								RunConsoleCommand("mingeban", "kick", "_" .. ply:EntIndex(), reason)
+							end
+						)
 					end):SetIcon("icon16/door_in.png")
 				end
 			end
