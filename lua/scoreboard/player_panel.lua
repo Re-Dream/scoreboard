@@ -129,6 +129,10 @@ function Player:Init()
 					menu:AddOption("Kick", function()
 						Derma_StringRequest("Scoreboard - Kick " .. ply:Nick(), "What's your reason for kicking this player?", "",
 							function(reason)
+								if reason:Trim() == "" then
+									reason = nil
+								end
+								print(reason)
 								RunConsoleCommand("mingeban", "kick", "_" .. ply:EntIndex(), reason)
 							end
 						)

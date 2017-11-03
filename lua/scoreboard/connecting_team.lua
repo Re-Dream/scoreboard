@@ -40,6 +40,7 @@ elseif CLIENT then
 	scoreboard.Connecting = {}
 
 	net.Receive(tag, function()
+		if not scoreboard.Connecting then return end
 		local info = net.ReadTable()
 		info.since = CurTime()
 		scoreboard.Connecting[info.userid] = info
@@ -47,6 +48,7 @@ elseif CLIENT then
 
 	gameevent.Listen("player_spawn")
 	hook.Add("player_spawn", tag, function(data)
+		if not scoreboard.Connecting then return end
 		local info = scoreboard.Connecting[data.userid]
 		if info then
 			info.spawned = true
