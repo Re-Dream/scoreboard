@@ -223,14 +223,18 @@ function Player:Init()
 
 				surface.SetFont("DermaDefault")
 				local txt
-				local since = math.max(0, CurTime() - ply.since or 0)
-				local _h = math.floor(since / 60 / 60)
-				local _m = math.floor(since / 60 % 60)
-				local _s = math.floor(since % 60)
-				if since > (scoreboard.DisconnectedTimeout) then
-					scoreboard.Connecting[self.UserID] = nil
+				if ply.since then
+					local since = math.max(0, CurTime() - ply.since or 0)
+					local _h = math.floor(since / 60 / 60)
+					local _m = math.floor(since / 60 % 60)
+					local _s = math.floor(since % 60)
+					if since > (scoreboard.DisconnectedTimeout) then
+						scoreboard.Connecting[self.UserID] = nil
+					end
+					txt = string.format("%d:%.2d", _h >= 1 and _h or _m, _h >= 1 and _m or _s)
+				else
+					txt = "WHAT"
 				end
-				txt = string.format("%d:%.2d", _h >= 1 and _h or _m, _h >= 1 and _m or _s)
 				local txtW, txtH = surface.GetTextSize(txt)
 				surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
 				surface.SetTextColor(Color(0, 0, 0, 230))
@@ -300,7 +304,8 @@ function Player:Think()
 	if scoreboard.Connecting then
 		local info = scoreboard.Connecting[ply.userid]
 		if istable(ply) then
-			if IsValid(_G.Player(ply.userid)) and info.spawned then
+			local ent = _G.Player(ply.userid)
+			if IsValid(ent) and info.spawned and ent:Alive() then -- has the player fully spawned
 				scoreboard.Connecting[ply.userid] = nil
 			end
 		end
