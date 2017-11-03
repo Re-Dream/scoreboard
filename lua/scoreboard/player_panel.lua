@@ -316,12 +316,13 @@ function Player:Think()
 	end
 end
 
-Player.Friend = Material("icon16/user_green.png")
-Player.Self   = Material("icon16/user.png")
-Player.Shield = Material("icon16/shield.png")
-Player.Typing = Material("icon16/comments.png")
-Player.Wrench = Material("icon16/wrench.png")
-Player.NoClip = Material("icon16/collision_off.png")
+Player.Friend  = Material("icon16/user_green.png")
+Player.Self    = Material("icon16/user.png")
+Player.Shield  = Material("icon16/shield.png")
+Player.Typing  = Material("icon16/comments.png")
+Player.Wrench  = Material("icon16/wrench.png")
+Player.NoClip  = Material("icon16/collision_off.png")
+Player.Vehicle = Material("icon16/car.png")
 local building = {
 	weapon_physgun = true,
 	gmod_tool = true,
@@ -350,8 +351,15 @@ Player.Tags = {
 	},
 	NoClip = {
 		display = function(ply)
-			if ply:GetMoveType() == MOVETYPE_NOCLIP then
+			if ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle() then
 				return "noclip", Player.NoClip
+			end
+		end
+	},
+	Vehicle = {
+		display = function(ply)
+			if ply:InVehicle() then
+				return "in vehicle", Player.Vehicle
 			end
 		end
 	},
