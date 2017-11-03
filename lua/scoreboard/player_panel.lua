@@ -371,7 +371,7 @@ function Player:Paint(w, h)
 
 	local isAFK = (IsValid(ply) and ply.IsAFK) and ply:IsAFK() or false
 
-	surface.SetDrawColor(isAFK and Color(225, 229, 240, 190) or Color(244, 248, 255, 190))
+	surface.SetDrawColor(isAFK and Color(207, 211, 221, 190) or Color(244, 248, 255, 190))
 	surface.DrawRect(0, 0, w, h)
 
 	if hovered then
@@ -410,7 +410,7 @@ function Player:Paint(w, h)
 
 	if (lply ~= ply and ply:GetFriendStatus() == "friend") or lply == ply then
 		DisableClipping(true)
-			surface.SetDrawColor(Color(255, 255, 255, 127))
+			surface.SetDrawColor(Color(255, 255, 255, 192))
 			surface.SetMaterial(lply == ply and self.Self or self.Friend)
 			surface.DrawTexturedRect(-16 - 4, h * 0.5 - 8, 16, 16)
 		DisableClipping(false)
