@@ -374,22 +374,15 @@ function scoreboard:HandlePlayers()
 
 	-- handle (dis)connecting players
 	if player.Connecting then
-		local connecting = 0
-		local disconnecting = 0
-		for userid, info in next, player.Connecting do
-			if not info.left then
-				connecting = connecting + 1
-			else
-				disconnecting = connecting + 1
-			end
-		end
+		local connecting = #team.GetPlayers(TEAM_CONNECTING)
+		local disconnected = #team.GetPlayers(TEAM_DISCONNECTED)
 		if not self.LastConnecting or self.LastConnecting ~= connecting then
-			self:RefreshPlayers(player.ConnectingTeam)
+			self:RefreshPlayers(TEAM_CONNECTING)
 			self.LastConnecting = connecting
 		end
-		if not self.LastDisconnecting or self.LastDisconnecting ~= disconnecting then
-			self:RefreshPlayers(player.DisconnectedTeam)
-			self.LastDisconnecting = disconnecting
+		if not self.LastDisconnected or self.LastDisconnected ~= disconnected then
+			self:RefreshPlayers(TEAM_DISCONNECTED)
+			self.LastDisconnected = disconnected
 		end
 	end
 
@@ -439,16 +432,9 @@ function scoreboard:RefreshPlayers(id)
 			self.Teams[id] = pnl
 		end
 
-		if (id == player.ConnectingTeam or id == player.DisconnectedTeam) and player.Connecting then
-			for userid, info in next, player.Connecting do
-				if (id == player.ConnectingTeam and not info.left) or (id == player.DisconnectedTeam and info.left) then
-					AddPlayer(pnl, userid, info)
-				end
-			end
-		else
-			for _, ply in next, team.GetPlayers(id) do
-				AddPlayer(pnl, ply:UserID(), ply)
-			end
+		for _, ply in next, team.GetPlayers(id) do
+			local userid = istable(ply) and ply.userid or ply:UserID()
+			AddPlayer(pnl, userid, ply)
 		end
 
 		for _, _pnl in next, pnl:GetChildren() do
@@ -458,8 +444,8 @@ function scoreboard:RefreshPlayers(id)
 				if istable(ply) then
 					local info = player.Connecting[ply.userid]
 					if 	not info or
-						(id == player.ConnectingTeam and info.left) or
-						(id == player.DisconnectedTeam and not info.left)
+						(id == TEAM_CONNECTING and info.left) or
+						(id == TEAM_DISCONNECTED and not info.left)
 					then
 						Do = true
 					end
