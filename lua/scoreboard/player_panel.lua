@@ -328,41 +328,36 @@ local building = {
 	gmod_tool = true,
 }
 Player.Tags = {
-	Admin = {
-		display = function(ply)
-			if ply:IsAdmin() then
-				return "admin", Player.Shield
-			end
+	Admin = function(ply)
+		if ply:IsAdmin() then
+			return "admin", Player.Shield
 		end
-	},
-	Typing = {
-		display = function(ply)
-			if ply:IsTyping() then
-				return "typing", Player.Typing
-			end
+	end,
+	Typing = function(ply)
+		if ply:IsTyping() then
+			return "typing", Player.Typing
 		end
-	},
-	Building = {
-		display = function(ply)
-			if IsValid(ply:GetActiveWeapon()) and building[ply:GetActiveWeapon():GetClass()] then
-				return "building", Player.Wrench
-			end
+	end,
+	Building = function(ply)
+		if IsValid(ply:GetActiveWeapon()) and building[ply:GetActiveWeapon():GetClass()] then
+			return "building", Player.Wrench
 		end
-	},
-	NoClip = {
-		display = function(ply)
-			if ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle() then
-				return "noclip", Player.NoClip
-			end
+	end,
+	NoClip = function(ply)
+		if ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle() then
+			return "noclip", Player.NoClip
 		end
-	},
-	Vehicle = {
-		display = function(ply)
-			if ply:InVehicle() then
-				return "in vehicle", Player.Vehicle
-			end
+	end,
+	Vehicle = function(ply)
+		if ply:InVehicle() then
+			return "in vehicle", Player.Vehicle
 		end
-	},
+	end,
+	Member = function(ply)
+		if _G.WebMaterial and ply:GetNWBool("is_in_steamgroup") then
+			return "member", WebMaterial("redream_logo_16", "https://gmlounge.us/media/redream-16.png")
+		end
+	end,
 }
 function Player:Paint(w, h)
 	local lply = LocalPlayer()
@@ -387,7 +382,7 @@ function Player:Paint(w, h)
 	end
 	local x = w - infoW --- 4
 	for _, tag in next, self.Tags do
-		local text, icon = tag.display(ply)
+		local text, icon = tag(ply)
 		if text and icon then
 			if hovered then
 				surface.SetFont("DermaDefault")
