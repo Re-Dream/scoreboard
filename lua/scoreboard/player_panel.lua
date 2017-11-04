@@ -228,8 +228,8 @@ function Player:Init()
 					local _h = math.floor(since / 60 / 60)
 					local _m = math.floor(since / 60 % 60)
 					local _s = math.floor(since % 60)
-					if ply.left == true and since > (scoreboard.DisconnectedTimeout) then
-						scoreboard.Connecting[self.UserID] = nil
+					if ply.left == true and since > (player.DisconnectedTimeout) then
+						player.Connecting[self.UserID] = nil
 					end
 					txt = string.format("%d:%.2d", _h >= 1 and _h or _m, _h >= 1 and _m or _s)
 				else
@@ -301,12 +301,12 @@ end
 
 function Player:Think()
 	local ply = self.Player
-	if scoreboard.Connecting then
-		local info = scoreboard.Connecting[ply.userid]
+	if player.Connecting then
+		local info = player.Connecting[ply.userid]
 		if istable(ply) then
 			local ent = _G.Player(ply.userid)
 			if IsValid(ent) and info.spawned and ent:Alive() then -- has the player fully spawned
-				scoreboard.Connecting[ply.userid] = nil
+				player.Connecting[ply.userid] = nil
 			end
 		end
 	end

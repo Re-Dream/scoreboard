@@ -30,26 +30,26 @@ if SERVER then
 		net.Broadcast()
 	end)
 elseif CLIENT then
-	scoreboard.ConnectingTeam = -1
-	scoreboard.DisconnectedTeam = -2
-	scoreboard.DisconnectedTimeout = 30
+	player.ConnectingTeam = -1
+	player.DisconnectedTeam = -2
+	player.DisconnectedTimeout = 30
 
-	team.SetUp(scoreboard.ConnectingTeam, "Connecting to server...", Color(97, 184, 12))
-	team.SetUp(scoreboard.DisconnectedTeam, "Recently disconnected", Color(63, 67, 82))
+	team.SetUp(player.ConnectingTeam, "Connecting to server...", Color(97, 184, 12))
+	team.SetUp(player.DisconnectedTeam, "Recently disconnected", Color(63, 67, 82))
 
-	scoreboard.Connecting = {}
+	player.Connecting = {}
 
 	net.Receive(tag, function()
-		if not scoreboard.Connecting then return end
+		if not player.Connecting then return end
 		local info = net.ReadTable()
 		info.since = CurTime()
-		scoreboard.Connecting[info.userid] = info
+		player.Connecting[info.userid] = info
 	end)
 
 	gameevent.Listen("player_spawn")
 	hook.Add("player_spawn", tag, function(data)
-		if not scoreboard.Connecting then return end
-		local info = scoreboard.Connecting[data.userid]
+		if not player.Connecting then return end
+		local info = player.Connecting[data.userid]
 		if info then
 			info.spawned = true
 		end

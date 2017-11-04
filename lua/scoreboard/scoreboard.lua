@@ -373,10 +373,10 @@ function scoreboard:HandlePlayers()
 	self.Last = player.GetCount()
 
 	-- handle (dis)connecting players
-	if scoreboard.Connecting then
+	if player.Connecting then
 		local connecting = 0
 		local disconnecting = 0
-		for userid, info in next, scoreboard.Connecting do
+		for userid, info in next, player.Connecting do
 			if not info.left then
 				connecting = connecting + 1
 			else
@@ -384,11 +384,11 @@ function scoreboard:HandlePlayers()
 			end
 		end
 		if not self.LastConnecting or self.LastConnecting ~= connecting then
-			self:RefreshPlayers(scoreboard.ConnectingTeam)
+			self:RefreshPlayers(player.ConnectingTeam)
 			self.LastConnecting = connecting
 		end
 		if not self.LastDisconnecting or self.LastDisconnecting ~= disconnecting then
-			self:RefreshPlayers(scoreboard.DisconnectedTeam)
+			self:RefreshPlayers(player.DisconnectedTeam)
 			self.LastDisconnecting = disconnecting
 		end
 	end
@@ -439,9 +439,9 @@ function scoreboard:RefreshPlayers(id)
 			self.Teams[id] = pnl
 		end
 
-		if (id == self.ConnectingTeam or id == self.DisconnectedTeam) and scoreboard.Connecting then
-			for userid, info in next, scoreboard.Connecting do
-				if (id == self.ConnectingTeam and not info.left) or (id == self.DisconnectedTeam and info.left) then
+		if (id == player.ConnectingTeam or id == player.DisconnectedTeam) and player.Connecting then
+			for userid, info in next, player.Connecting do
+				if (id == player.ConnectingTeam and not info.left) or (id == player.DisconnectedTeam and info.left) then
 					AddPlayer(pnl, userid, info)
 				end
 			end
@@ -456,10 +456,10 @@ function scoreboard:RefreshPlayers(id)
 				local ply = _pnl.Player
 				local Do = false
 				if istable(ply) then
-					local info = scoreboard.Connecting[ply.userid]
+					local info = player.Connecting[ply.userid]
 					if 	not info or
-						(id == self.ConnectingTeam and info.left) or
-						(id == self.DisconnectedTeam and not info.left)
+						(id == player.ConnectingTeam and info.left) or
+						(id == player.DisconnectedTeam and not info.left)
 					then
 						Do = true
 					end
