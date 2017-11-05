@@ -358,6 +358,13 @@ end
 player.GetCount = player.GetCount or function()
 	return #player.GetAll()
 end
+local function lastKey(tbl)
+	local last = 0
+	for k, _ in next, tbl do
+		last = k
+	end
+	return k
+end
 function scoreboard:HandlePlayers()
 	-- init players the first time they join
 	local done = {}
@@ -374,8 +381,8 @@ function scoreboard:HandlePlayers()
 
 	-- handle (dis)connecting players
 	if player.Connecting then
-		local connecting = table.GetFirstKey(team.GetPlayers(TEAM_CONNECTING))
-		local disconnected = table.GetFirstKey(team.GetPlayers(TEAM_DISCONNECTED))
+		local connecting = lastKey(team.GetPlayers(TEAM_CONNECTING))
+		local disconnected = lastKey(team.GetPlayers(TEAM_CONNECTING))
 		if not self.LastConnecting or self.LastConnecting ~= connecting then
 			self:RefreshPlayers(TEAM_CONNECTING)
 			self.LastConnecting = connecting
