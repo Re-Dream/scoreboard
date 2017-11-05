@@ -374,8 +374,8 @@ function scoreboard:HandlePlayers()
 
 	-- handle (dis)connecting players
 	if player.Connecting then
-		local connecting = #team.GetPlayers(TEAM_CONNECTING)
-		local disconnected = #team.GetPlayers(TEAM_DISCONNECTED)
+		local connecting = table.GetFirstKey(team.GetPlayers(TEAM_CONNECTING))
+		local disconnected = table.GetFirstKey(team.GetPlayers(TEAM_DISCONNECTED))
 		if not self.LastConnecting or self.LastConnecting ~= connecting then
 			self:RefreshPlayers(TEAM_CONNECTING)
 			self.LastConnecting = connecting
