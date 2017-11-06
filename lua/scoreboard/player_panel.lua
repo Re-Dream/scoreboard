@@ -66,9 +66,10 @@ function Player:Init()
 		return true
 	end
 	function self.Avatar.Click.DoClick()
-		local ply = self.Player
-		if ply.SteamID64 and ply:SteamID64() == nil then return end
-		gui.OpenURL("https://steamcommunity.com/profiles/" .. self.Player:SteamID64())
+		local sid64 = self:SteamID64()
+		if not sid64 then return end
+
+		gui.OpenURL("https://steamcommunity.com/profiles/" .. sid64)
 	end
 	function self.Avatar.Click.DoRightClick()
 		local menu = DermaMenu()
