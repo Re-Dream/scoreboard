@@ -101,8 +101,8 @@ function Player:Init()
 	function self.Info.DoDoubleClick()
 		local ply = self.Player
 		if not IsValid(ply) then return end
-		if mingeban and mingeban.commands.goto then
-			LocalPlayer():ConCommand("mingeban goto _" .. ply:EntIndex())
+		if mingeban and mingeban.GetCommand("go") then
+			LocalPlayer():ConCommand("mingeban go _" .. ply:EntIndex())
 		end
 	end
 	function self.Info.DoRightClick()
@@ -112,13 +112,13 @@ function Player:Init()
 		if mingeban and mingeban.commands then
 			local cmds = mingeban.commands
 			if IsValid(ply) and lply ~= ply then
-				if lply:HasPermission("command.go") and cmds.goto then
+				if lply:HasPermission("command.go") and mingeban.GetCommand("go") then
 					menu:AddOption("Go To", function()
-						lply:ConCommand("mingeban goto _" .. ply:EntIndex())
+						lply:ConCommand("mingeban go _" .. ply:EntIndex())
 					end):SetIcon("icon16/bullet_go.png")
 				end
 
-				if lply:HasPermission("command.bring") and cmds.bring then
+				if lply:HasPermission("command.bring") and mingeban.GetCommand("bring") then
 					menu:AddOption("Bring", function()
 						lply:ConCommand("mingeban bring _" .. ply:EntIndex())
 					end):SetIcon("icon16/arrow_in.png")
@@ -126,7 +126,7 @@ function Player:Init()
 
 				menu:AddSpacer()
 
-				if lply:HasPermission("command.kick") and cmds.kick then
+				if lply:HasPermission("command.kick") and mingeban.GetCommand("kick") then
 					menu:AddOption("Kick", function()
 						Derma_StringRequest("Scoreboard - Kick " .. ply:Nick(), "What's your reason for kicking this player?", "",
 							function(reason)
