@@ -150,7 +150,7 @@ function Player:Init()
 			if not IsValid(self.Player) then
 				self:Remove()
 			end
-			return
+			return true
 		end
 
 		local nick = ply.Nick and ply:Nick() or ply.name

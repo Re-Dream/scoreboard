@@ -59,9 +59,9 @@ function Team:Paint(w, h)
 		else
 			self:SetCursor("arrow")
 		end
-
-		return true
 	end
+
+	return true
 end
 function Team:DoClick()
 	local mX, mY = self:LocalCursorPos()
