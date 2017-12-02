@@ -133,12 +133,17 @@ function Player:Init()
 								if reason:Trim() == "" then
 									reason = nil
 								end
-								print(reason)
 								RunConsoleCommand("mingeban", "kick", "_" .. ply:EntIndex(), reason)
 							end
 						)
 					end):SetIcon("icon16/door_in.png")
 				end
+
+				menu:AddSpacer()
+
+				menu:AddOption("Toggle Mute", function()
+					ply:SetMuted(not ply:IsMuted())
+				end):SetIcon("icon16/sound_mute.png")
 			end
 		end
 		menu:Open()
@@ -229,7 +234,7 @@ function Player:Init()
 					local _h = math.floor(since / 60 / 60)
 					local _m = math.floor(since / 60 % 60)
 					local _s = math.floor(since % 60)
-					if ply.left == true and since > (player.DisconnectedTimeout) then
+					if ply.left == true and since > player.DisconnectedTimeout then
 						player.Connecting[self.UserID] = nil
 					end
 					txt = string.format("%d:%.2d", _h >= 1 and _h or _m, _h >= 1 and _m or _s)
@@ -324,6 +329,7 @@ Player.Typing  = Material("icon16/comments.png")
 Player.Wrench  = Material("icon16/wrench.png")
 Player.NoClip  = Material("icon16/collision_off.png")
 Player.Vehicle = Material("icon16/car.png")
+Player.Muted   = Material("icon16/sound_mute.png")
 local building = {
 	weapon_physgun = true,
 	gmod_tool = true,
@@ -359,6 +365,11 @@ Player.Tags = {
 			return "member", WebMaterial("redream_logo_16", "https://gmlounge.us/media/redream-16.png")
 		end
 	end,
+	Muted = function(ply)
+		if ply:IsMuted() then
+			return "muted", Player.Muted
+		end
+	end
 }
 function Player:Paint(w, h)
 	local lply = LocalPlayer()
