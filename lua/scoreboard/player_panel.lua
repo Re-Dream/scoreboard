@@ -8,6 +8,7 @@ surface.CreateFont(tag .. "Player", {
 })
 
 local Player = {}
+Player.Icons = {}
 
 local avatars = {}
 local hovered
@@ -182,14 +183,17 @@ function Player:Init()
 		self.Info.Ping:Dock(RIGHT)
 		self.Info.Ping:SetWide(58)
 		self.Info.Ping:SetCursor("arrow")
-		self.Info.Ping.Clock = Material("icon16/clock.png")
-		self.Info.Ping.Latency = Material("icon16/transmit_blue.png")
+		self.Icons.Clock = Material("icon16/clock.png")
+		self.Icons.Latency = Material("icon16/transmit.png")
+		self.Icons.Latency2 = Material("icon16/transmit_blue.png")
 		function self.Info.Ping.Paint(s, w, h)
 			local ply = self.Player
 			if IsValid(ply) then
 				self.Info.Ping:SetTooltip("Ping / AFK Time")
 
 				local isAFK = ply.IsAFK and ply:IsAFK() or false
+				local ping = ply:Ping()
+
 				if isAFK then
 					surface.SetDrawColor(Color(127, 64, 255, 70))
 				else
@@ -198,8 +202,19 @@ function Player:Init()
 
 				surface.DrawRect(0, 0, w, h)
 
-				surface.SetMaterial(isAFK and s.Clock or s.Latency)
-				surface.SetDrawColor(Color(255, 255, 255))
+				local decentPing, badPing = 100, 200
+				local pingColor
+				local pingIcon = self.Icons.Latency
+				if ping <= decentPing then
+					pingIcon = self.Icons.Latency2
+					pingColor = Color(64, 176, 0)
+				elseif ping >= decentPing and ping <= badPing then
+					pingColor = Color(176, 115, 0)
+				else
+					pingColor = Color(176, 90, 90)
+				end
+				surface.SetMaterial(isAFK and self.Icons.Clock or pingIcon)
+				surface.SetDrawColor(pingColor)
 				surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
 
 				surface.SetFont("DermaDefault")
@@ -211,7 +226,7 @@ function Player:Init()
 					local s = math.floor(AFKTime % 60)
 					txt = string.format("%d:%.2d", h >= 1 and h or m, h >= 1 and m or s)
 				else
-					txt = ply:Ping()
+					txt = ping
 				end
 				local txtW, txtH = surface.GetTextSize(txt)
 				surface.SetTextPos(4 + 16 + 4, h * 0.5 - txtH * 0.5)
@@ -223,7 +238,7 @@ function Player:Init()
 				surface.SetDrawColor(Color(127, 167, 99, 70))
 				surface.DrawRect(0, 0, w, h)
 
-				surface.SetMaterial(s.Clock)
+				surface.SetMaterial(self.Icons.Clock)
 				surface.SetDrawColor(Color(255, 255, 255))
 				surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
 
@@ -322,14 +337,18 @@ function Player:Think()
 	end
 end
 
-Player.Friend  = Material("icon16/user_green.png")
-Player.Self    = Material("icon16/user.png")
-Player.Shield  = Material("icon16/shield.png")
-Player.Typing  = Material("icon16/comments.png")
-Player.Wrench  = Material("icon16/wrench.png")
-Player.NoClip  = Material("icon16/collision_off.png")
-Player.Vehicle = Material("icon16/car.png")
-Player.Muted   = Material("icon16/sound_mute.png")
+Player.Icons.Friend  = Material("icon16/user_green.png")
+Player.Icons.Self    = Material("icon16/user.png")
+Player.Icons.Shield  = Material("icon16/shield.png")
+Player.Icons.Typing  = Material("icon16/comments.png")
+Player.Icons.Wrench  = Material("icon16/wrench.png")
+Player.Icons.NoClip  = Material("icon16/collision_off.png")
+Player.Icons.Vehicle = Material("icon16/car.png")
+Player.Icons.Muted   = Material("icon16/sound_mute.png")
+for name, mat in next, Player.Icons do
+	mat:SetVector("$color", Vector(3, 3, 3)) -- set to white-ish, better control over colors
+end
+
 local building = {
 	weapon_physgun = true,
 	gmod_tool = true,
@@ -337,27 +356,27 @@ local building = {
 Player.Tags = {
 	Admin = function(ply)
 		if ply:IsAdmin() then
-			return "admin", Player.Shield
+			return "admin", Player.Icons.Shield, Color(215, 157, 0)
 		end
 	end,
 	Typing = function(ply)
 		if ply:IsTyping() then
-			return "typing", Player.Typing
+			return "typing", Player.Icons.Typing, Color(113, 210, 255)
 		end
 	end,
 	Building = function(ply)
 		if IsValid(ply:GetActiveWeapon()) and building[ply:GetActiveWeapon():GetClass()] then
-			return "building", Player.Wrench
+			return "building", Player.Icons.Wrench, Color(255, 126, 0)
 		end
 	end,
 	NoClip = function(ply)
 		if ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle() then
-			return "noclip", Player.NoClip
+			return "noclip", Player.Icons.NoClip, Color(0, 255, 174)
 		end
 	end,
 	Vehicle = function(ply)
 		if ply:InVehicle() then
-			return "in vehicle", Player.Vehicle
+			return "in vehicle", Player.Icons.Vehicle, Color(183, 85, 220)
 		end
 	end,
 	Member = function(ply)
@@ -367,7 +386,7 @@ Player.Tags = {
 	end,
 	Muted = function(ply)
 		if ply:IsMuted() then
-			return "muted", Player.Muted
+			return "muted", Player.Icons.Muted, Color(200, 42, 42)
 		end
 	end
 }
@@ -394,7 +413,7 @@ function Player:Paint(w, h)
 	end
 	local x = w - infoW --- 4
 	for _, tag in next, self.Tags do
-		local text, icon = tag(ply)
+		local text, icon, color = tag(ply)
 		if text and icon then
 			if hovered then
 				surface.SetFont("DermaDefault")
@@ -407,7 +426,9 @@ function Player:Paint(w, h)
 			end
 
 			x = x - 16
-			surface.SetDrawColor(Color(255, 255, 255, 192))
+			local color = color or Color(255, 255, 255)
+			color.a = 192
+			surface.SetDrawColor(color)
 			surface.SetMaterial(icon)
 			surface.DrawTexturedRect(x, h * 0.5 - 8, 16, 16)
 
@@ -418,7 +439,7 @@ function Player:Paint(w, h)
 	if (lply ~= ply and ply:GetFriendStatus() == "friend") or lply == ply then
 		DisableClipping(true)
 			surface.SetDrawColor(Color(255, 255, 255, 192))
-			surface.SetMaterial(lply == ply and self.Self or self.Friend)
+			surface.SetMaterial(lply == ply and self.Icons.Self or self.Icons.Friend)
 			surface.DrawTexturedRect(-16 - 4, h * 0.5 - 8, 16, 16)
 		DisableClipping(false)
 	end
