@@ -207,14 +207,14 @@ function Player:Init()
 				local pingIcon = self.Icons.Latency
 				if ping <= decentPing then
 					pingIcon = self.Icons.Latency2
-					pingColor = Color(64, 176, 0)
+					pingColor = Color(90, 255, 0)
 				elseif ping >= decentPing and ping <= badPing then
-					pingColor = Color(176, 115, 0)
+					pingColor = Color(255, 192, 0)
 				else
-					pingColor = Color(176, 90, 90)
+					pingColor = Color(255, 90, 90)
 				end
 				surface.SetMaterial(isAFK and self.Icons.Clock or pingIcon)
-				surface.SetDrawColor(pingColor)
+				surface.SetDrawColor(isAFK and Color(255, 255, 255) or pingColor)
 				surface.DrawTexturedRect(4, h * 0.5 - 8, 16, 16)
 
 				surface.SetFont("DermaDefault")
