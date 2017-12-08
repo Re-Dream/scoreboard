@@ -337,17 +337,14 @@ function Player:Think()
 	end
 end
 
-Player.Icons.Friend  = Material("icon16/user_green.png")
-Player.Icons.Self    = Material("icon16/user.png")
 Player.Icons.Shield  = Material("icon16/shield.png")
 Player.Icons.Typing  = Material("icon16/comments.png")
 Player.Icons.Wrench  = Material("icon16/wrench.png")
 Player.Icons.NoClip  = Material("icon16/collision_off.png")
 Player.Icons.Vehicle = Material("icon16/car.png")
 Player.Icons.Muted   = Material("icon16/sound_mute.png")
-for name, mat in next, Player.Icons do
-	mat:SetVector("$color", Vector(3, 3, 3)) -- set to white-ish, better control over colors
-end
+Player.Icons.Friend  = Material("icon16/user_green.png")
+Player.Icons.Self    = Material("icon16/user.png")
 
 local building = {
 	weapon_physgun = true,
@@ -386,7 +383,7 @@ Player.Tags = {
 	end,
 	Muted = function(ply)
 		if ply:IsMuted() then
-			return "muted", Player.Icons.Muted, Color(200, 42, 42)
+			return "muted", Player.Icons.Muted
 		end
 	end
 }
@@ -411,7 +408,11 @@ function Player:Paint(w, h)
 	for _, pnl in next, self.Info:GetChildren() do
 		infoW = infoW + pnl:GetWide()
 	end
-	local x = w - infoW --- 4
+	local x = w - infoW - 4
+	if IsValid(self.Info.Playtime) and self.Info.Playtime:IsVisible() then
+		x = x + 4
+	end
+
 	for _, tag in next, self.Tags do
 		local text, icon, color = tag(ply)
 		if text and icon then
@@ -426,6 +427,9 @@ function Player:Paint(w, h)
 			end
 
 			x = x - 16
+			if color then
+				icon:SetVector("$color", Vector(3, 3, 3)) -- set to white-ish, better control over
+			end
 			local color = color or Color(255, 255, 255)
 			color.a = 192
 			surface.SetDrawColor(color)
@@ -434,6 +438,10 @@ function Player:Paint(w, h)
 
 			x = x - 4
 		end
+	end
+
+	for name, mat in next, Player.Icons do
+		mat:SetVector("$color", Vector(1, 1, 1)) -- reset
 	end
 
 	if (lply ~= ply and ply:GetFriendStatus() == "friend") or lply == ply then
