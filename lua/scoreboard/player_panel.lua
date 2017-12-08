@@ -207,9 +207,9 @@ function Player:Init()
 				local pingIcon = self.Icons.Latency
 				if ping <= decentPing then
 					pingIcon = self.Icons.Latency2
-					pingColor = Color(90, 255, 0)
+					pingColor = Color(90, 255, 90)
 				elseif ping >= decentPing and ping <= badPing then
-					pingColor = Color(255, 192, 0)
+					pingColor = Color(255, 255, 90)
 				else
 					pingColor = Color(255, 90, 90)
 				end
