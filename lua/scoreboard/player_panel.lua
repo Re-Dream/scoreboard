@@ -353,12 +353,12 @@ local building = {
 Player.Tags = {
 	Admin = function(ply)
 		if ply:IsAdmin() then
-			return "admin", Player.Icons.Shield, Color(215, 157, 0)
+			return "admin", Player.Icons.Shield, Color(160, 150, 0)
 		end
 	end,
 	Typing = function(ply)
 		if ply:IsTyping() then
-			return "typing", Player.Icons.Typing, Color(113, 210, 255)
+			return "typing", Player.Icons.Typing, Color(100, 150, 255)
 		end
 	end,
 	Building = function(ply)
@@ -373,7 +373,7 @@ Player.Tags = {
 	end,
 	Vehicle = function(ply)
 		if ply:InVehicle() then
-			return "in vehicle", Player.Icons.Vehicle, Color(183, 85, 220)
+			return "in vehicle", Player.Icons.Vehicle, Color(183, 120, 220)
 		end
 	end,
 	Member = function(ply)
