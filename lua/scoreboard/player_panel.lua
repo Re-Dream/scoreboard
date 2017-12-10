@@ -13,10 +13,11 @@ Player.Icons = {}
 local avatars = {}
 local hovered
 local function GetAvatar(sid)
+	sid = sid or ""
 	if not avatars[sid] then
 		local a = vgui.Create("AvatarImage", vgui.GetWorldPanel())
 		a.Avatar = true
-		a:SetSteamID(sid or "", 184)
+		a:SetSteamID(sid, 184)
 		a:SetSize(184, 184)
 		a:ParentToHUD()
 		a.Alpha = 0
