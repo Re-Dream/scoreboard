@@ -16,7 +16,7 @@ local function GetAvatar(sid)
 	if not avatars[sid] then
 		local a = vgui.Create("AvatarImage", vgui.GetWorldPanel())
 		a.Avatar = true
-		a:SetSteamID(sid, 184)
+		a:SetSteamID(sid or "", 184)
 		a:SetSize(184, 184)
 		a:ParentToHUD()
 		a.Alpha = 0
@@ -305,7 +305,7 @@ function Player:RefreshAvatar()
 	local ply = self.Player
 	if IsValid(ply) and not ply:SteamID64() then return end
 	if not IsValid(ply) and not istable(ply) then return end
-	local sid64 = self:SteamID64()
+	local sid64 = self:SteamID64() or ""
 
 	local w = 32
 	if self.Avatar:GetTall() > 32 then w = 64 end
