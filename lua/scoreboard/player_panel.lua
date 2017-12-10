@@ -50,7 +50,7 @@ end)
 function Player:SteamID64()
 	local ply = self.Player
 	if not IsValid(ply) and not istable(ply) then return end
-	return ply.SteamID64 and ply:SteamID64() or util.SteamIDTo64(ply.steamid)
+	return ply.SteamID64 and ply:SteamID64() or (ply.steamid and util.SteamIDTo64(ply.steamid) or nil) -- ??
 end
 
 function Player:Init()
@@ -77,21 +77,23 @@ function Player:Init()
 		local ply = self.Player
 		local sid64 = self:SteamID64()
 
-		menu:AddOption("Open Profile", function()
-			gui.OpenURL("https://steamcommunity.com/profiles/" .. sid64)
-		end):SetIcon("icon16/book_go.png")
-		menu:AddOption("Copy Profile URL", function()
-			SetClipboardText("http://steamcommunity.com/profiles/" .. sid64)
-		end):SetIcon("icon16/book_link.png")
+		if sid64 then
+			menu:AddOption("Open Profile", function()
+				gui.OpenURL("https://steamcommunity.com/profiles/" .. sid64)
+			end):SetIcon("icon16/book_go.png")
+			menu:AddOption("Copy Profile URL", function()
+				SetClipboardText("http://steamcommunity.com/profiles/" .. sid64)
+			end):SetIcon("icon16/book_link.png")
 
-		menu:AddSpacer()
+			menu:AddSpacer()
 
-		menu:AddOption("Copy SteamID", function()
-			SetClipboardText(ply.SteamID and ply:SteamID() or ply.steamid)
-		end):SetIcon("icon16/tag_blue.png")
-		menu:AddOption("Copy Community ID", function()
-			SetClipboardText(tostring(sid64))
-		end):SetIcon("icon16/tag_yellow.png")
+			menu:AddOption("Copy SteamID", function()
+				SetClipboardText(ply.SteamID and ply:SteamID() or ply.steamid)
+			end):SetIcon("icon16/tag_blue.png")
+			menu:AddOption("Copy Community ID", function()
+				SetClipboardText(tostring(sid64))
+			end):SetIcon("icon16/tag_yellow.png")
+		end
 
 		menu:Open()
 	end
