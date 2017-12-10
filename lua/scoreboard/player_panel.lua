@@ -13,7 +13,7 @@ Player.Icons = {}
 local avatars = {}
 local hovered
 local function GetAvatar(sid)
-	sid = sid or ""
+	sid = sid or "BOT"
 	if not avatars[sid] then
 		local a = vgui.Create("AvatarImage", vgui.GetWorldPanel())
 		a.Avatar = true
@@ -306,7 +306,7 @@ function Player:RefreshAvatar()
 	local ply = self.Player
 	if IsValid(ply) and not ply:SteamID64() then return end
 	if not IsValid(ply) and not istable(ply) then return end
-	local sid64 = self:SteamID64() or ""
+	local sid64 = self:SteamID64() or "BOT"
 
 	local w = 32
 	if self.Avatar:GetTall() > 32 then w = 64 end

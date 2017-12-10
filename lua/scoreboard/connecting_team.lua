@@ -43,7 +43,7 @@ elseif CLIENT then
 
 		local info = net.ReadTable()
 		info.since = CurTime()
-		player.Connecting[info.userid] = info
+		player.Connecting[info.userid or "BOT"] = info
 	end)
 
 	gameevent.Listen("player_spawn")
