@@ -348,47 +348,56 @@ Player.Icons.Vehicle = Material("icon16/car.png")
 Player.Icons.Muted   = Material("icon16/sound_mute.png")
 Player.Icons.Friend  = Material("icon16/user_green.png")
 Player.Icons.Self    = Material("icon16/user.png")
+Player.Icons.Flags	 = {}
+for _, fileName in next, (file.Find("materials/flags16/*.png", "GAME")) do
+	Player.Icons.Flags[fileName:StripExtension():lower()] = Material("flags16/" .. fileName)
+end
 
 local building = {
 	weapon_physgun = true,
 	gmod_tool = true,
 }
 Player.Tags = {
-	Admin = function(ply)
-		if ply:IsAdmin() then
-			return "admin", Player.Icons.Shield, Color(160, 150, 0)
+	function(ply)
+		if ply:GetCountry():Trim() ~= "" then
+			return ply:GetCountry():lower(), Player.Icons.Flags[ply:GetCountryCode():lower()], nil, 11
 		end
 	end,
-	Typing = function(ply)
-		if ply:IsTyping() then
-			return "typing", Player.Icons.Typing, Color(100, 150, 255)
-		end
-	end,
-	Building = function(ply)
-		if IsValid(ply:GetActiveWeapon()) and building[ply:GetActiveWeapon():GetClass()] then
-			return "building", Player.Icons.Wrench, Color(255, 126, 0)
-		end
-	end,
-	NoClip = function(ply)
-		if ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle() then
-			return "noclip", Player.Icons.NoClip, Color(0, 255, 174)
-		end
-	end,
-	Vehicle = function(ply)
-		if ply:InVehicle() then
-			return "in vehicle", Player.Icons.Vehicle, Color(183, 120, 220)
-		end
-	end,
-	Member = function(ply)
+	function(ply)
 		if _G.WebMaterial and ply:GetNWBool("is_in_steamgroup") then
 			return "member", WebMaterial("redream_logo_16", "https://gmlounge.us/media/redream-16.png")
 		end
 	end,
-	Muted = function(ply)
+	function(ply)
+		if ply:IsAdmin() then
+			return "admin", Player.Icons.Shield, Color(160, 150, 0)
+		end
+	end,
+	function(ply)
+		if ply:IsTyping() then
+			return "typing", Player.Icons.Typing, Color(100, 150, 255)
+		end
+	end,
+	function(ply)
+		if IsValid(ply:GetActiveWeapon()) and building[ply:GetActiveWeapon():GetClass()] then
+			return "building", Player.Icons.Wrench, Color(255, 126, 0)
+		end
+	end,
+	function(ply)
+		if ply:GetMoveType() == MOVETYPE_NOCLIP and not ply:InVehicle() then
+			return "noclip", Player.Icons.NoClip, Color(0, 255, 174)
+		end
+	end,
+	function(ply)
+		if ply:InVehicle() then
+			return "in vehicle", Player.Icons.Vehicle, Color(183, 120, 220)
+		end
+	end,
+	function(ply)
 		if ply:IsMuted() then
 			return "muted", Player.Icons.Muted
 		end
-	end
+	end,
 }
 function Player:Paint(w, h)
 	local lply = LocalPlayer()
@@ -417,7 +426,8 @@ function Player:Paint(w, h)
 	end
 
 	for _, tag in next, self.Tags do
-		local text, icon, color = tag(ply)
+		local text, icon, color, iconH = tag(ply)
+		if not iconH then iconH = 16 end
 		if text and icon then
 			if hovered then
 				surface.SetFont("DermaDefault")
@@ -437,14 +447,16 @@ function Player:Paint(w, h)
 			color.a = 192
 			surface.SetDrawColor(color)
 			surface.SetMaterial(icon)
-			surface.DrawTexturedRect(x, h * 0.5 - 8, 16, 16)
+			surface.DrawTexturedRect(x, h * 0.5 - iconH * 0.5, 16, iconH)
 
 			x = x - 4
 		end
 	end
 
 	for name, mat in next, Player.Icons do
-		mat:SetVector("$color", Vector(1, 1, 1)) -- reset
+		if type(mat) == "IMaterial" then
+			mat:SetVector("$color", Vector(1, 1, 1)) -- reset
+		end
 	end
 
 	if (lply ~= ply and ply:GetFriendStatus() == "friend") or lply == ply then
