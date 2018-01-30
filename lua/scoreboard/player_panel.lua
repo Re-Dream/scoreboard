@@ -365,7 +365,7 @@ Player.Tags = {
 	end,
 	function(ply)
 		if _G.WebMaterial and ply:GetNWBool("is_in_steamgroup") then
-			return "member", WebMaterial("redream_logo_16", "https://gmlounge.us/media/redream-16.png")
+			return "member", WebMaterial("redream_logo_16", "https://re-dream.org/media/redream-16.png")
 		end
 	end,
 	function(ply)
