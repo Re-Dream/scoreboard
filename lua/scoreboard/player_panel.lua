@@ -359,7 +359,7 @@ local building = {
 }
 Player.Tags = {
 	function(ply)
-		if ply:GetCountry():Trim() ~= "" then
+		if ply.GetCountry and ply:GetCountry() and ply:GetCountry():Trim() ~= "" then
 			return ply:GetCountry():lower(), Player.Icons.Flags[ply:GetCountryCode():lower()], nil, 11
 		end
 	end,

@@ -43,12 +43,9 @@ function scoreboard:GetContentSize()
 	return w, h
 end
 
--- local GAMEMODE = nil -- GLib
-if not istable(GAMEMODE) then
-	include("scoreboard/connecting_team.lua")
-	include("scoreboard/team_panel.lua")
-	include("scoreboard/player_panel.lua")
-end
+include("scoreboard/connecting_team.lua")
+include("scoreboard/team_panel.lua")
+include("scoreboard/player_panel.lua")
 
 local wantsToClose = false
 local activeFrame
